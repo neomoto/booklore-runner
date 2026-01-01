@@ -1,0 +1,126 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-macos:
+    runs-on: macos-14  # Apple Silicon runner
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: |
+          package-lock.json
+          booklore-upstream/booklore-ui/package-lock.json
+    
+    - name: Setup Java 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+    
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-apple-darwin
+    
+    - name: Install Tauri dependencies
+      run: |
+        npm ci
+    
+    - name: Build BookLore Backend
+      run: |
+        chmod +x scripts/build-backend.sh
+        ./scripts/build-backend.sh
+    
+    - name: Build BookLore Frontend
+      run: |
+        chmod +x scripts/build-frontend.sh
+        ./scripts/build-frontend.sh
+    
+    - name: Download MariaDB
+      run: |
+        chmod +x scripts/download-mariadb.sh
+        ./scripts/download-mariadb.sh
+    
+    - name: Build Tauri App
+      run: |
+        npm run build -- --target aarch64-apple-darwin
+    
+    - name: Sign Application (ad-hoc)
+      run: |
+        codesign --force --deep --sign - "target/aarch64-apple-darwin/release/bundle/macos/BookLore.app"
+    
+    - name: Create DMG
+      run: |
+        hdiutil create -volname "BookLore" -srcfolder "target/aarch64-apple-darwin/release/bundle/macos/BookLore.app" -ov -format UDZO "BookLore-${{ github.ref_name }}-arm64.dmg"
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: BookLore-macOS-arm64
+        path: |
+          BookLore-*.dmg
+          target/aarch64-apple-darwin/release/bundle/macos/BookLore.app
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          BookLore-*.dmg
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create-update-manifest:
+    needs: build-macos
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: BookLore-macOS-arm64
+    
+    - name: Create update manifest
+      run: |
+        VERSION="${{ github.ref_name }}"
+        VERSION="${VERSION#v}"  # Remove 'v' prefix
+        
+        cat > latest.json << EOF
+        {
+          "version": "$VERSION",
+          "notes": "See release notes at https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}",
+          "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "platforms": {
+            "darwin-aarch64": {
+              "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/BookLore-${{ github.ref_name }}-arm64.dmg"
+            }
+          }
+        }
+        EOF
+    
+    - name: Upload update manifest
+      uses: softprops/action-gh-release@v1
+      with:
+        files: latest.json
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

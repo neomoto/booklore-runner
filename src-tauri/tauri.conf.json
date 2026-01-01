@@ -1,0 +1,103 @@
+{
+    "$schema": "https://schema.tauri.app/config/2",
+    "productName": "BookLore",
+    "version": "1.0.0",
+    "identifier": "org.booklore.runner",
+    "build": {
+        "beforeDevCommand": "python3 -m http.server 1420 --directory src",
+        "devUrl": "http://localhost:1420",
+        "beforeBuildCommand": "",
+        "frontendDist": "../src"
+    },
+    "app": {
+        "withGlobalTauri": true,
+        "windows": [
+            {
+                "title": "BookLore",
+                "label": "main",
+                "width": 1200,
+                "height": 800,
+                "minWidth": 800,
+                "minHeight": 600,
+                "resizable": true,
+                "center": true,
+                "decorations": true,
+                "transparent": true,
+                "visible": true,
+                "maximizable": true,
+                "minimizable": true,
+                "closable": true,
+                "hiddenTitle": false,
+                "titleBarStyle": "Visible"
+            }
+        ],
+        "trayIcon": {
+            "iconPath": "icons/icon.png",
+            "iconAsTemplate": true
+        },
+        "security": {
+            "csp": null
+        }
+    },
+    "bundle": {
+        "active": true,
+        "targets": [
+            "app",
+            "dmg"
+        ],
+        "icon": [
+            "icons/32x32.png",
+            "icons/128x128.png",
+            "icons/128x128@2x.png",
+            "icons/icon.icns",
+            "icons/icon.ico"
+        ],
+        "category": "Utility",
+        "shortDescription": "Self-hosted digital library manager",
+        "longDescription": "BookLore: A self-hosted, multi-user digital library with smart shelves, auto metadata, Kobo & KOReader sync, BookDrop imports, OPDS support, and a built-in reader for EPUB, PDF, and comics.",
+        "macOS": {
+            "entitlements": null,
+            "exceptionDomain": "",
+            "frameworks": [],
+            "minimumSystemVersion": "14.0",
+            "signingIdentity": "-"
+        },
+        "resources": [
+            "resources/booklore-api.jar",
+            "resources/README.md",
+            "resources/frontend/**/*"
+        ],
+        "fileAssociations": [
+            {
+                "ext": [
+                    "epub"
+                ],
+                "mimeType": "application/epub+zip",
+                "description": "EPUB eBook"
+            },
+            {
+                "ext": [
+                    "pdf"
+                ],
+                "mimeType": "application/pdf",
+                "description": "PDF Document"
+            },
+            {
+                "ext": [
+                    "cbz",
+                    "cbr"
+                ],
+                "mimeType": "application/x-cbr",
+                "description": "Comic Book Archive"
+            }
+        ]
+    },
+    "plugins": {
+        "updater": {
+            "endpoints": [
+                "https://github.com/booklore-app/booklore-runner/releases/latest/download/latest.json"
+            ],
+            "pubkey": ""
+        }
+    }
+}

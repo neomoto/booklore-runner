@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+target/
+
+# Build outputs
+dist/
+*.dmg
+*.app
+
+# Resources (downloaded/built)
+src-tauri/resources/booklore-api.jar
+src-tauri/resources/frontend/
+src-tauri/resources/mariadb/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# macOS
+.DS_Store
+
+# Rust
+Cargo.lock
+
+# Logs
+*.log
+npm-debug.log*

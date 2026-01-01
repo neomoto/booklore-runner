@@ -1,0 +1,20 @@
+{
+    "name": "booklore-runner",
+    "version": "1.0.0",
+    "description": "Native macOS app wrapper for BookLore - A self-hosted digital library",
+    "scripts": {
+        "dev": "tauri dev",
+        "build": "tauri build",
+        "build:backend": "./scripts/build-backend.sh",
+        "build:frontend": "./scripts/build-frontend.sh",
+        "build:all": "npm run build:backend && npm run build:frontend && npm run build"
+    },
+    "author": "",
+    "license": "GPL-3.0",
+    "devDependencies": {
+        "@tauri-apps/cli": "^2.0.0"
+    },
+    "dependencies": {
+        "@tauri-apps/api": "^2.0.0"
+    }
+}
