@@ -35,11 +35,17 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '21'
+        cache: 'gradle'
     
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: aarch64-apple-darwin
+    
+    - name: Rust Cache
+      uses: swatinem/rust-cache@v2
+      with:
+        workspaces: src-tauri
     
     - name: Install Tauri dependencies
       run: |
