@@ -63,11 +63,11 @@ jobs:
     
     - name: Sign Application (ad-hoc)
       run: |
-        codesign --force --deep --sign - "target/aarch64-apple-darwin/release/bundle/macos/BookLore.app"
+        codesign --force --deep --sign - "src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BookLore.app"
     
     - name: Create DMG
       run: |
-        hdiutil create -volname "BookLore" -srcfolder "target/aarch64-apple-darwin/release/bundle/macos/BookLore.app" -ov -format UDZO "BookLore-${{ github.ref_name }}-arm64.dmg"
+        hdiutil create -volname "BookLore" -srcfolder "src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BookLore.app" -ov -format UDZO "BookLore-${{ github.ref_name }}-arm64.dmg"
     
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
@@ -75,7 +75,7 @@ jobs:
         name: BookLore-macOS-arm64
         path: |
           BookLore-*.dmg
-          target/aarch64-apple-darwin/release/bundle/macos/BookLore.app
+          src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BookLore.app
     
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
